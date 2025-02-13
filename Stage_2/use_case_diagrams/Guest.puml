@@ -1,0 +1,19 @@
+@startuml
+  actor "Гость" as Guest
+  actor "Пользователь" as User
+
+  usecase "Регистрация и вход" as UC_Login
+  usecase "Аутентификация через email и пароль" as UC_Auth_Email
+  usecase "Аутентификация через сторонние сервисы" as UC_Auth_SSO
+  usecase "Поиск книг" as UC_Search_Books
+  usecase "Чтение книг онлайн" as UC_Read_Books
+
+  Guest --> UC_Login
+  Guest --> UC_Search_Books
+  Guest --> UC_Read_Books
+
+  UC_Login <|-- UC_Auth_Email
+  UC_Login <|-- UC_Auth_SSO
+
+  Guest <|-- User
+@enduml

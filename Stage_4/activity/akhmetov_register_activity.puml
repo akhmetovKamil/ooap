@@ -1,0 +1,40 @@
+@startuml
+start
+
+:Guest opens Signup Page;
+:render(form);
+:render(page);
+
+
+:Guest enters email;
+
+repeat
+  :Guest enters password;
+repeat while (validatePassword(password)) is (false) not (true)
+
+
+:handleRegister(userData);
+:dispatch(register(userData));
+:register(userData);
+:findUser(userData);
+:db.users.findOne(userData);
+
+if (User exists?) then (Yes)
+  :Return User Exists Error;
+  :setError("User already exist");
+  :redirect(loginPage);
+  stop
+else (No)
+  :hashPassword(password);
+  :signAsync(data);
+  :createUser(data);
+  :db.users.insertOne(data);
+endif
+
+:setItem(accessToken);
+:setItem(refreshToken);
+:Show success message;
+:redirect(mainPage);
+
+stop
+@enduml

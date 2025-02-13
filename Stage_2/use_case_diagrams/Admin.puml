@@ -1,0 +1,31 @@
+@startuml
+  actor "Редактор" as Editor
+  actor "Администратор" as Admin
+  actor "Владелец" as Owner
+
+
+  usecase "Просмотр предложенных книг" as UC_Review_Books
+  usecase "Редактирование опубликованных книг" as UC_Edit_Books
+  usecase "Публикация предложенной книги" as UC_Publish_Book
+  usecase "Редактирование предложенной книги" as UC_Edit_Publish_Book
+  usecase "Отклонение предложение книги" as UC_Deny_Book
+  usecase "Удаление книги" as UC_Delete_Book
+  usecase "Управление пользователями" as UC_Manage_Users
+  usecase "Блокировка пользователя" as UC_Block_Users
+  usecase "Разблокировка пользователя" as UC_Unblock_Users
+  usecase "Модерация комментариев" as UC_Moderate_Comments
+
+  Admin --> UC_Review_Books
+  Admin --> UC_Edit_Books
+  UC_Delete_Book --> UC_Edit_Books :<<extend>>
+  UC_Publish_Book --> UC_Review_Books :<<extend>>
+  UC_Edit_Publish_Book --> UC_Publish_Book :<<extend>>
+  UC_Deny_Book--> UC_Review_Books :<<extend>>
+  Admin --> UC_Manage_Users
+  UC_Manage_Users <|-- UC_Unblock_Users
+  UC_Manage_Users <|-- UC_Block_Users
+  Admin --> UC_Moderate_Comments
+
+  Editor <|-- Admin
+  Admin <|-- Owner
+@enduml

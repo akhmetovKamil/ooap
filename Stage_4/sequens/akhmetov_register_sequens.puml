@@ -1,0 +1,86 @@
+@startuml
+actor Guest as guest
+participant "RegisterComponent" as reg
+participant "AuthPage" as authPage
+participant "ReduxToolkitStore.AuthSlice" as store
+database "LocalStorage" as localStorage
+participant "Axios.AuthApi" as api
+participant "AuthController" as controller
+participant "AuthService" as service
+participant "JwtService" as jwt
+participant "UsersService" as userService
+database "MongoDb" as db
+
+
+guest -> reg: Open Signup Page
+reg -> authPage: render()
+authPage --> guest: Show Register Form
+guest -> reg: Enter email
+
+loop Validate password
+  guest -> reg: Enter password
+  reg -> authPage: validating(password)
+  authPage -> store: setError()
+  store --> authPage: Enter valid password
+  authPage --> guest: Enter valid password
+end
+
+guest -> reg: Submit register
+reg -> authPage: handleRegister(userData)
+authPage -> store: dispatch(register(userData))
+store --> api: register(userData)
+api --> controller: register(userData)
+controller --> service: register(userData)
+service --> userService: findUser(userData)
+userService -> db: db.users.findOne(userData)
+
+alt user dont exist
+  db --> userService: User dont exist
+  userService --> service: User dont exist
+  service -> service: hashPassword(password)
+  service --> jwt **: signAsync(data)
+  jwt --> service : response
+  service --> userService: createUser(userData)
+  userService -> db: db.users.insertOne(userData)
+  db --> userService: Created User
+  userService --> service: Success
+  service --> controller: Success
+  controller --> api: Success
+  api --> store: Success
+
+else user is exist
+  db --> userService: User Exist
+  userService --> service: User Exist
+  service --> controller: Error
+  controller --> api: Error
+  api --> store: Error
+  store --> authPage: Error
+  authPage -> reg: Show Error Message
+  reg -> guest !!: Redirect to login page
+  deactivate reg
+end
+
+break "Back" button clicked
+  guest -> reg: click "Back" button
+  reg --> authPage: back()
+  authPage --> guest !!: Redirect to landing page
+end
+
+par Save Tokens
+  group Saving Access Token
+    store --> localStorage **: setItem("accessToken", accessToken)
+  end
+  group Saving Refresh Token
+    store --> localStorage: setItem("refreshToken", refreshToken)
+  end
+  critical
+    authPage --> store: dispatch(setError)
+    store --> guest: Browser error message
+  end
+end
+
+authPage --> guest: Show Success Message
+authPage --> guest: Redirect to main page
+
+
+@enduml

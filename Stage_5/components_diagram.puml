@@ -1,0 +1,45 @@
+@startuml
+actor Client
+
+component "Frontend"{
+  [StoreComponent] as StoreComponent
+  [AxiosComponent] as AxiosComponent
+  [UIComponent] as UIComponent
+
+  Client -> UIComponent
+  UIComponent -down(0- StoreComponent
+  StoreComponent -down(0- AxiosComponent
+}
+
+component "Backend" {
+  [JwtComponent] as JwtComponent
+  [AuthComponent] as AuthComponent
+  [BooksComponent] as BooksComponent
+  [BookmarksComponent] as BookmarksComponent
+  [ReviewsComponent] as ReviewsComponent
+  [PaymentComponent] as PaymentComponent
+  [UsersComponent] as UsersComponent
+  [DatabaseComponent] as DatabaseComponent
+
+  [JwtComponent] -up0)- [AuthComponent]
+  [UsersComponent] -(0)- [BooksComponent]
+  [UsersComponent] -down0)- [PaymentComponent]
+  [BooksComponent] -left0)- [ReviewsComponent]
+  [UsersComponent] -right0)- [BookmarksComponent]
+  [UsersComponent] -left0)- [AuthComponent]
+  [BooksComponent] -up0)- [BookmarksComponent]
+
+}
+
+AxiosComponent -(0- AuthComponent
+AxiosComponent -(0- BooksComponent
+AxiosComponent -(0- BookmarksComponent
+AxiosComponent -(0- ReviewsComponent
+AxiosComponent -(0- PaymentComponent
+AxiosComponent -(0- UsersComponent
+
+component "Database" {
+  [MongoDB] as MongoDB
+}
+
+@enduml

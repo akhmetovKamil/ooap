@@ -1,0 +1,395 @@
+@startuml
+package "Frontend" {
+
+  package "UI" {
+    package "Components" {
+
+      class LoginComponent {
+        + props: Credentials
+        + render(): JSX
+        + handleLogin(): void
+      }
+
+      class RegisterComponent {
+        + props: UserDTO
+        + render(): JSX
+        + handleRegister(): void
+      }
+
+      class ProfileFormComponent {
+        + props: ProfileFormProps
+        + render(): JSX
+        + handleSubmit(): void
+      }
+
+      class BookSearchComponent {
+        + props: BookSearchProps
+        + render(): JSX
+        + handleSearch(): void
+      }
+
+      class BookViewerComponent {
+        + props: BookViewerProps
+        + render(): JSX
+        + handlePageChange(): void
+        + handleBookmark(): void
+      }
+
+      class PaymentFormComponent {
+        + props: PaymentFormProps
+        + render(): JSX
+        + handleSubmit(): void
+      }
+
+      class ReviewFormComponent {
+        + props: ReviewFormProps
+        + render(): JSX
+        + handleReviewSubmit(): void
+      }
+
+      class AdminBookListComponent {
+        + props: AdminBookListProps
+        + render(): JSX
+        + handleBookAction(): void
+      }
+
+      class AdminUserListComponent {
+        + props: AdminUserListProps
+        + render(): JSX
+        + handleUserAction(): void
+      }
+
+      class EditorDraftListComponent {
+        + props: EditorDraftListProps
+        + render(): JSX
+        + handleSubmitDraft(): void
+      }
+
+    }
+
+    package "Pages" {
+      class AuthPage {
+        + props: AuthPageProps
+        + formData: UserDTO | Credentials
+        + useEffect()
+        + handleSubmit(): void
+        + render(): JSX
+        + dispatch(): void
+      }
+
+      class ProfilePage {
+        + props: ProfilePageProps
+        + isEditing: boolean
+        + reduxData: UsersState
+        + useEffect()
+        + checkAccess(): boolean
+        + render(): JSX
+        + dispatch(): void
+      }
+
+      class BookSearchPage {
+        + props: BookSearchPageProps
+        + searchQuery: string
+        + reduxData: BookReaderState
+        + useEffect()
+        + fetchBooks(): void
+        + render(): JSX
+        + dispatch(): void
+      }
+
+      class BookViewerPage {
+        + props: BookViewerPageProps
+        + currentPage: number
+        + reduxData: BookReaderState
+        + useEffect()
+        + checkAccess(): boolean
+        + handleBookmark(): void
+        + render(): JSX
+        + dispatch(): void
+      }
+
+      class PaymentPage {
+        + props: PaymentPageProps
+        + paymentData: PaymentDTO
+        + reduxData: PaymentsState
+        + useEffect()
+        + submitPayment(): void
+        + render(): JSX
+        + dispatch(): void
+      }
+
+      class ReviewPage {
+        + props: ReviewPageProps
+        + reviewText: string
+        + rating: number
+        + reduxData: ReviewsState
+        + useEffect()
+        + submitReview(): void
+        + render(): JSX
+        + dispatch(): void
+      }
+
+      class AdminDashboardPage {
+        + reduxData: BookReaderState
+        + useEffect()
+        + moderateBook(): void
+        + render(): JSX
+        + dispatch(): void
+      }
+
+      class OwnerDashboardPage {
+        + reduxData: UsersAdministrationState
+        + useEffect()
+        + manageAdmin(): void
+        + render(): JSX
+        + dispatch(): void
+      }
+
+      class EditorDashboardPage {
+        + draftData: BookDTO
+        + reduxData: BookEditorState
+        + useEffect(): void
+        + submitBook(): void
+        + render(): JSX
+        + dispatch(): void
+      }
+    }
+  }
+
+  LoginComponent --* AuthPage
+  RegisterComponent --* AuthPage
+  ProfileFormComponent --* ProfilePage
+  BookSearchComponent --* BookSearchPage
+  BookViewerComponent --* BookViewerPage
+  PaymentFormComponent --* PaymentPage
+  ReviewFormComponent --* ReviewPage
+  AdminBookListComponent --* AdminDashboardPage
+  AdminUserListComponent --* AdminDashboardPage
+  EditorDraftListComponent --* EditorDashboardPage
+
+  AuthPage ..> ReduxToolkitStore.AuthSlice
+  ProfilePage ..> ReduxToolkitStore.UsersSlice
+  BookSearchPage ..> ReduxToolkitStore.BookReaderSlice
+  BookViewerPage ..> ReduxToolkitStore.BookReaderSlice
+  BookViewerPage ..> ReduxToolkitStore.BookmarksSlice
+  PaymentPage ..> ReduxToolkitStore.PaymentsSlice
+  ReviewPage ..> ReduxToolkitStore.ReviewsSlice
+  AdminDashboardPage ..> ReduxToolkitStore.UsersAdministrationSlice
+  AdminDashboardPage ..> ReduxToolkitStore.BookAdminSlice
+  OwnerDashboardPage ..> ReduxToolkitStore.UsersAdministrationSlice
+  OwnerDashboardPage ..> ReduxToolkitStore.PaymentsSlice
+  EditorDashboardPage ..> ReduxToolkitStore.BookEditorSlice
+
+  package "ReduxToolkitStore" {
+
+    class AuthSlice {
+      + state: AuthState
+      + login(email: String, password: String): void
+      + logout(): void
+      + register(userData: UserDTO): void
+      + refreshToken(rt: String): void
+      + sso(method: SSOMethods): void
+      + setLoading(isLoading: boolean): void
+      + setError(error: String): void
+    }
+
+    class BookAdminSlice {
+      + state: BookAdminState
+      + updateBook(bookId: String, bookData: BookDTO): void
+      + deleteBook(bookId: String): void
+      + previewBook(bookId: String): void
+      + publishBook(bookId: String): void
+      + rejectBook(bookId: String): void
+      + setLoading(isLoading: boolean): void
+      + setError(error: String): void
+    }
+
+    class BookEditorSlice {
+      + state: BookEditorState
+      + updateBook(bookId: String, bookData: BookDTO): void
+      + deleteBook(bookId: String): void
+      + addAudioVersion(audio: any): void
+      + suggestBook(bookData: BookDTO): void
+      + setLoading(isLoading: boolean): void
+      + setError(error: String): void
+    }
+
+    class BookReaderSlice {
+      + state: BookReaderState
+      + setCurrentPage(page: number): void
+      + setPageSize(pageSize: number): void
+      + listenAudioBook(bookId: String): void
+      + downloadBook(type: FileType): void
+      + addBookToList(type: ListType, bookId: String): void
+      + deleteBookFromList(type: ListType, bookId: String): void
+      + buyBook(bookId: String): void
+      + setSearchFilter(searchParam: String): void
+      + setSortOrder(order: SortOrder): void
+      + searchBooks(searchParam: String): void
+      + getBook(bookId: String): void
+      + getBoughtBooks(userId: String): void
+      + getAllBooks(authorId: String): void
+      + setLoading(isLoading: boolean): void
+      + setError(error: String): void
+    }
+
+    class ReviewsSlice {
+      + state: ReviewsState
+      + fetchReviews(bookId: String): void
+      + addReview(reviewData: ReviewDTO): void
+      + deleteReview(reviewId: String): void
+      + editReview(reviewId: String, reviewData: ReviewDTO): void
+      + setLoading(isLoading: boolean): void
+      + setError(error: String): void
+    }
+
+    class PaymentsSlice {
+      + state: PaymentsState
+      + processPayment(paymentData: PaymentDTO): void
+      + getPaymentDetails(paymentId: String): void
+      + setLoading(isLoading: boolean): void
+      + setError(error: String): void
+    }
+
+    class UsersAdministrationSlice {
+      state: UsersAdministrationState
+      + fetchUser(userId: String): void
+      + getUsers(ids: String[]): void
+      + changeRole(userId: String, role: Role): void
+      + deleteUser(userId: String): void
+      + blockUser(userId: String): void
+      + allowEditor(userId: String): void
+      + rejectEditor(userId: String): void
+      + updateProfile(userData: UserDTO): void
+      + setLoading(isLoading: boolean): void
+      + setError(error: String): void
+    }
+
+    class UsersSlice {
+      + state: UsersState
+      + fetchUser(userId: String): void
+      + startSubscription(cardNumber: String): void
+      + stopSubscription(): void
+      + becomeEditor(data: EditorForm): void
+      + getList(type: ListType): void
+      + setLoading(isLoading: boolean): void
+      + setError(error: String): void
+    }
+
+    class BookmarksSlice {
+      + state: BookmarksState
+      + fetchBookmarksByUser(userId: String): void
+      + fetchBookmarksByBook(bookId: String): void
+      + createBookmark(bookmarkData: BookmarkDTO, bookId: String): void
+      + editBookmark(bookmarkData: BookmarkDTO, bookmarkId: String): void
+      + deleteBookmark(bookmarkId: String): void
+      + getBookmarkById(bookmarkId: String): void
+      + setLoading(isLoading: boolean): void
+      + setError(error: String): void
+    }
+  }
+
+  AuthSlice --> Axios.AuthApi
+  BookAdminSlice --> Axios.BooksApi
+  BookEditorSlice --> Axios.BooksApi
+  BookReaderSlice --> Axios.BooksApi
+  ReviewsSlice --> Axios.ReviewsApi
+  PaymentsSlice --> Axios.PaymentApi
+  UsersSlice --> Axios.UsersApi
+  UsersAdministrationSlice --> Axios.UsersApi
+  BookmarksSlice --> Axios.BookmarksApi
+
+  package "Axios" {
+
+    class AuthApi {
+      + login(cred: Credentials): Tokens
+      + register(userData: UserDTO): void
+      + refreshToken(rt: String): Tokens
+      + logout(): void
+      + sso(method: SSOMethods): Tokens
+    }
+
+    class BooksApi {
+      + getAllBooks(authorId: String): List<BookDTO>
+      + searchBooks(searchParam: String): List<BookDTO>
+      + getBook(bookId: String): BookDTO
+      + suggestBook(bookData: BookDTO): void
+      + buyBook(bookId: String): BookDTO
+      + previewBook(bookId: String): BookDTO
+      + publishBook(bookId: String): void
+      + rejectBook(bookId: String): void
+      + updateBook(bookId: String, bookData: BookDTO): void
+      + deleteBook(bookId: String): void
+      + getBoughtBooks(userId: String): List<BookDTO>
+      + addAudioVersion(audio: any): BookDTO
+      + listenAudioBook(bookId: String): mp3
+      + downloadBook(type: FileType): File
+      + addBookToList(type: ListType, bookId: String): void
+      + deleteBookFromList(type: ListType, bookId: String): void
+    }
+
+    class ReviewsApi {
+      + getReviews(bookId: String): List<ReviewDTO>
+      + addReview(bookId: String, reviewData: ReviewDTO): void
+      + deleteReview(reviewId: String): void
+      + editReview(reviewId: String, reviewData: ReviewDTO): void
+    }
+
+    class PaymentApi {
+      + processPayment(paymentData: PaymentDTO): void
+      + getPaymentDetails(paymentId: String): PaymentDTO
+    }
+
+    class UsersApi {
+      + getUser(userId: String): UserDTO
+      + changeInfo(userData: UserDTO): void
+      + changeRole(userId: String, role: String): void
+      + deleteUser(userId: String): void
+      + blockUser(userId: String): void
+      + startSubscription(cardNumber: String): void
+      + stopSubscription(): void
+      + getList(type: String): List<String>
+      + getUsers(ids: String[]): List<UserDTO>
+      + becomeEditor(data: EditorForm): void
+      + allowEditor(userId: String): void
+      + rejectEditor(userId: String): void
+    }
+
+    class BookmarksApi {
+      + getBookmarksByUser(userId: String): List<BookmarkDTO>
+      + getBookmarksByBook(bookId: String): List<BookmarkDTO>
+      + createBookmark(bookmarkData: BookmarkDTO, bookId: String): BookmarkDTO
+      + editBookmark(bookmarkData: BookmarkDTO, bookmarkId: String): BookmarkDTO
+      + deleteBookmark(bookmarkId: String): void
+      + getBookmarkById(bookmarkId: String): BookmarkDTO
+    }
+  }
+
+  package "BrowserApi" {
+    class LocalStorage {
+      + setItem(key: String, value: String): void
+      + getItem(key: String): String
+      + removeItem(key: String): void
+      + clear(): void
+    }
+  }
+
+  AuthSlice --> BrowserApi.LocalStorage
+}
+
+package "Backend" {
+  class AuthController {}
+  class BooksController {}
+  class ReviewsController {}
+  class PaymentController {}
+  class UsersController {}
+  class BookmarksController {}
+}
+
+AuthApi --> AuthController
+BooksApi --> BooksController
+ReviewsApi --> ReviewsController
+PaymentApi --> PaymentController
+UsersApi --> UsersController
+BookmarksApi --> BookmarksController
+@enduml

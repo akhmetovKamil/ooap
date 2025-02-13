@@ -1,0 +1,14 @@
+@startuml
+  actor "Администратор" as Admin
+  actor "Владелец" as Owner
+
+  usecase "Назначение администраторов" as UC_Assign_Admins
+  usecase "Управление подписками" as UC_Manage_Subscriptions
+  usecase "Вывод денежных средств" as UC_Withdraw_Funds
+
+  Owner --> UC_Assign_Admins
+  Owner --> UC_Manage_Subscriptions
+  Owner --> UC_Withdraw_Funds
+
+  Admin <|-- Owner
+@enduml

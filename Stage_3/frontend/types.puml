@@ -1,0 +1,254 @@
+@startuml
+package "States"{
+  entity AuthState {
+    + isAuthenticated: boolean
+    + tokens: Tokens
+    + role: Role
+    + isLoading: boolean
+    + error: string | null
+  }
+
+  entity BookAdminState {
+    + books: BookDTO[]
+    + totalBooks: number
+    + isLoading: boolean
+    + error: string | null
+  }
+
+  entity BookEditorState {
+    + drafts: BookDTO[]
+    + preview: BookDTO | null
+    + isLoading: boolean
+    + error: string | null
+  }
+
+  entity BookReaderState {
+    + currentBook: BookDTO | null
+    + audioVersion: mp3
+    + isLoading: boolean
+    + error: string | null
+  }
+
+  entity ReviewsState {
+    + reviews: List<ReviewDTO>
+    + currentReview: ReviewDTO | null
+    + isLoading: boolean
+    + error: string | null
+  }
+
+  entity PaymentsState {
+    + paymentId: String | null
+    + paymentDetails: PaymentDTO | null
+    + isLoading: boolean
+    + error: String | null
+    + transactionStatus: String | null
+  }
+
+  entity BookmarksState {
+    + bookmarks: List<BookmarkDTO> | null
+    + isLoading: boolean
+    + error: String | null
+    + totalCount: number
+    + currentBookmark: BookmarkDTO | null
+  }
+
+  entity UsersAdministrationState {
+    + users: List<UserDTO> | null
+    + selectedUser: UserDTO | null
+    + isLoading: boolean
+    + error: String | null
+    + totalCount: number
+  }
+
+  entity UsersState {
+    + user: UserDTO | null
+    + subscriptionStatus: boolean
+    + role: Role
+    + isLoading: boolean
+    + error: String | null
+  }
+}
+package "Types"{
+  enum SSOMethods {
+    + FACEBOOK
+    + GOOGLE
+    + APPLE
+  }
+
+  entity UserDTO {
+    + String name
+    + String email
+    + String password
+  }
+
+  entity Credentials {
+    + String email
+    + String password
+  }
+
+  entity Tokens {
+    + String accessToken
+    + String refreshToken
+  }
+
+  enum Role {
+    + OWNER
+    + ADMIN
+    + EDITOR
+    + USER
+    + GUEST
+  }
+
+  enum ErrorCodes {
+    + USER_NOT_FOUND,
+    + INVALID_CREDENTIALS,
+    + BOOK_NOT_FOUND,
+    + PAYMENT_FAILED,
+    + UNAUTHORIZED_ACCESS,
+    + REFRESH_TOKEN_EXPIRED,
+    + ACCESS_TOKEN_EXPIRED,
+    + INVALID_PASSWORD,
+    + EMAIL_ALREADY_EXISTS,
+    + USER_ALREADY_EXISTS,
+    + BOOK_ALREADY_EXISTS,
+    + INSUFFICIENT_FUNDS,
+    + FORBIDDEN_ACCESS,
+    + BAD_REQUEST,
+    + NOT_FOUND,
+    + INTERNAL_SERVER_ERROR
+  }
+
+  entity BookDTO {
+    + String title
+    + String author
+    + String genre
+    + String cover
+    + mp3 audioVersion
+    + String text
+    + bool isPaid
+    + float price
+  }
+
+  enum FileType {
+    + EPUB
+    + FB2
+    + TXT
+    + PDF
+  }
+
+  entity BookmarkDTO {
+    + String color
+    + String text
+  }
+
+  entity ReviewDTO {
+    + int rating
+    + String text
+  }
+
+  entity PaymentDTO {
+    + String userId
+    + float amount
+    + String cardNumber
+  }
+
+  enum ListType {
+    + LIKED
+    + WANT
+    + READING
+    + READ
+  }
+
+  enum LoginMode {
+    + LOGIN
+    + REGISTER
+  }
+
+  entity EditorForm {
+    + String alias
+    + String mainGenre
+    + String whyBecomeEditor
+    + int experience
+  }
+
+  enum SortOrder {
+    + ASCENDING
+    + DESCENDING
+  }
+}
+package "ComponentProps" {
+
+  entity ProfileFormProps {
+    userProfile: UserDTO
+    onSubmit: (data: UserDTO) => void
+  }
+
+  entity BookSearchProps {
+    filters: String
+    searchQuery: String
+    onSearch: (query: String) => void
+  }
+
+  entity BookViewerProps {
+    book: BookDTO
+    currentPage: number
+    onPageChange: (page: number) => void
+  }
+
+  entity PaymentFormProps {
+    paymentData: PaymentDTO
+    onSubmit: (paymentData: PaymentDTO) => void
+  }
+
+  entity ReviewFormProps {
+    bookId: String
+    reviewText: String
+    rating: number
+    onSubmit: (reviewData: ReviewDTO) => void
+  }
+
+  entity AdminBookListProps {
+    books: List<BookDTO>
+    onUpdateBook: (bookId: String, bookData: BookDTO) => void
+    onDeleteBook: (bookId: String) => void
+  }
+
+  entity AdminUserListComponent {
+    users: List<UserDTO>
+    onChangeRole: (userId: String, role: Role) => void
+    onDeleteUser: (userId: String) => void
+  }
+
+  entity EditorDraftListProps {
+    draftBooks: List<BookDTO>
+    onSubmitBook: (bookId: String) => void
+  }
+}
+
+package "PageProps"{
+  entity AuthPageProps {
+    mode: LoginMode
+  }
+
+  entity PaymentPageProps {
+    userRole: Role
+  }
+
+  entity ReviewPageProps {
+    bookId: string
+  }
+
+  entity ProfilePageProps {
+    userRole: Role
+  }
+
+  entity BookSearchPageProps {
+    filters: string
+  }
+
+  entity BookViewerPageProps {
+    bookId: string
+    userRole: Role
+  }
+}
+@enduml

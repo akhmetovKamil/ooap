@@ -1,0 +1,27 @@
+@startuml
+start
+
+:Guest opens Search Books Page;
+:render(page);
+
+
+
+repeat
+  :Guest enters book title, author, etc;
+  :handleSearch(searchParam);
+  :dispatch(searchBooks);
+  :db.users.findOne(userData);
+  if (is books exist?) then (no)
+    :Show message;
+    :Redirect(mainPage);
+    stop
+  else (yes)
+    :render(books);
+    :Show success message;
+  endif
+  if (Clicked openBook(book)) then (yes)
+    :Redirect(BookId);
+    stop
+
+
+@enduml

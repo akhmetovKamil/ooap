@@ -1,0 +1,472 @@
+@startuml
+package "Backend" {
+
+  class JwtModule {
+    + providers: JwtService
+    + exports: JwtService
+    + register()
+  }
+
+  class JwtService {
+    + signAsync(payload: JwtPayload, time: int): Tokens
+  }
+
+  JwtModule --> JwtService
+
+  class AuthModule {
+    + imports: UsersModule, JwtModule
+    + providers: AuthService
+    + controllers: AuthController
+  }
+
+  class AuthController {
+    + register(userData: UserDTO): void
+    + login(credentials: Credentials): Tokens
+    + logout(userId: ObjectId): void
+    + refreshToken(rt: String): Tokens
+    + sso(method: SSOMethods): Tokens
+  }
+
+  class AuthService {
+    + ssoContext: SSOContext
+    + register(data: UserDTO): User
+    + login(credentials: Credentials): Tokens
+    + logout(userId: ObjectId): void
+    + refreshToken(rt: String): Tokens
+    + sso(method: SSOMethods): Tokens
+    + hashToken(token: String): String
+    + compareTokens(token: String, hash: String): bool
+    + generateTokens(data: JwtPayload): Tokens
+  }
+
+  interface SSOStrategy {
+    + authenticate(data: any): Tokens
+  }
+
+  class FacebookStrategy implements SSOStrategy {
+    + authenticate(data: any): Tokens
+  }
+
+  class GoogleStrategy implements SSOStrategy {
+    + authenticate(data: any): Tokens
+  }
+
+  class AppleStrategy implements SSOStrategy {
+    + authenticate(data: any): Tokens
+  }
+
+  class SSOContext {
+    - strategy: SSOStrategy
+    + setStrategy(strategy: SSOStrategy): void
+    + executeStrategy(data: any): Tokens
+  }
+
+
+  AuthService --> SSOContext
+  SSOContext o-- SSOStrategy
+
+
+
+  enum SSOMethods {
+    + FACEBOOK
+    + GOOGLE
+    + APPLE
+  }
+
+  entity UserDTO {
+    + String name
+    + String email
+    + String password
+  }
+
+  entity Credentials {
+    + String email
+    + String password
+  }
+
+  entity Tokens {
+    + String accessToken
+    + String refreshToken
+  }
+
+  enum Role {
+    + OWNER
+    + ADMIN
+    + EDITOR
+    + USER
+    + GUEST
+  }
+
+  entity JwtPayload {
+    + String id
+    + String email
+    + Role role
+  }
+
+  enum ErrorCodes {
+    + USER_NOT_FOUND,
+    + INVALID_CREDENTIALS,
+    + BOOK_NOT_FOUND,
+    + PAYMENT_FAILED,
+    + UNAUTHORIZED_ACCESS,
+    + REFRESH_TOKEN_EXPIRED,
+    + ACCESS_TOKEN_EXPIRED,
+    + INVALID_PASSWORD,
+    + EMAIL_ALREADY_EXISTS,
+    + USER_ALREADY_EXISTS,
+    + BOOK_ALREADY_EXISTS,
+    + INSUFFICIENT_FUNDS,
+    + FORBIDDEN_ACCESS,
+    + BAD_REQUEST,
+    + NOT_FOUND,
+    + INTERNAL_SERVER_ERROR
+  }
+
+  AuthModule --> AuthController
+  AuthController --> AuthService
+
+  class BooksModule {
+    + imports: BooksSchema, UsersModule
+    + providers: BooksService
+    + controllers: BooksController
+    + exports: BooksService
+  }
+
+  class BooksController {
+    + getAllBooks(authorId: ObjectId): List<BookSchema>
+    + searchBooks(searchParam: String): List<BookSchema>
+    + getBook(bookId: ObjectId): BookSchema
+    + suggestBook(bookData: BookDTO): void
+    + previewBook(bookId: ObjectId): BookSchema
+    + publishBook(bookId: ObjectId): void
+    + rejectBook(bookId: ObjectId): void
+    + updateBook(bookId: ObjectId, bookData: BookDTO): void
+    + deleteBook(bookId: ObjectId): void
+    + buyBook(bookId: ObjectId): BookSchema
+    + getBoughtBooks(userId: ObjectId): List<BookSchema>
+    + addAudioVersion(audio: mp3): BookSchema
+    + listenAudioBook(bookId: ObjectId): mp3
+    + downloadBook(type: FileType): File
+    + addBookToList(type: ListType, bookId: ObjectId): void
+    + deleteBookFromList(type: ListType, bookId: ObjectId): void
+  }
+
+  class BooksService {
+    + getAllBooks(authorId: ObjectId): List<BookSchema>
+    + searchBooks(searchParam: String): List<BookSchema>
+    + getBook(bookId: ObjectId)): BookSchema
+    + suggestBook(bookData: BookDTO): void
+    + previewBook(bookId: ObjectId): BookSchema
+    + publishBook(bookId: ObjectId): void
+    + rejectBook(bookId: ObjectId): void
+    + updateBook(bookId: ObjectId, data: BookDTO): void
+    + deleteBook(bookId: ObjectId): void
+    + buyBook(bookId: ObjectId): BookSchema
+    + getBoughtBooks(userId: ObjectId): List<BookSchema>
+    + addAudioVersion(audio: mp3): BookSchema
+    + listenAudioBook(bookId: ObjectId): mp3
+    + generateBookFile(type: FileType): File
+    + addBookToList(type: ListType, bookId: ObjectId): void
+    + deleteBookFromList(type: ListType, bookId: ObjectId): void
+  }
+
+  class BookSchema {
+    + ObjectId id
+    + String title
+    + String author
+    + String genre
+    + String cover
+    + mp3 audioVersion
+    + bool isPublished
+    + String text
+    + List<ObjectId> bookmarks
+    + bool isPaid
+    + float price
+  }
+
+  entity BookDTO {
+    + String title
+    + String author
+    + String genre
+    + String cover
+    + mp3 audioVersion
+    + String text
+    + bool isPaid
+    + float price
+  }
+
+  enum FileType {
+    + EPUB
+    + FB2
+    + TXT
+    + PDF
+  }
+
+  BooksModule --> BooksController
+  BooksController --> BooksService
+  BooksService --> BookSchema
+
+  class BookmarksModule {
+    + imports: BookmarksSchema, UsersModule, BooksModule
+    + providers: BookmarksService
+    + controllers: BookmarksController
+  }
+
+  class BookmarksController {
+    + createBookmark(params: BookmarkDTO, bookId : ObjectId): BookmarksSchema
+    + editBookmark(params: BookmarkDTO, bookmarkId : ObjectId): BookmarksSchema
+    + deleteBookmark(bookmarkId: ObjectId): void
+    + getBookmarkById(bookmarkId: ObjectId): BookmarksSchema
+    + getBookmarksByUserId(userId: ObjectId): List<BookmarksSchema>
+    + getBookmarksByBookId(bookId: ObjectId): List<BookmarksSchema>
+  }
+
+  class BookmarksService {
+    + createBookmark(params: BookmarkDTO, bookId : ObjectId): BookmarksSchema
+    + editBookmark(params: BookmarkDTO, bookmarkId : ObjectId): BookmarksSchema
+    + deleteBookmark(bookmarkId: ObjectId): void
+    + getBookmarkById(bookmarkId: ObjectId): BookmarksSchema
+    + getBookmarksByUserId(userId: ObjectId): List<BookmarksSchema>
+    + getBookmarksByBookId(bookId: ObjectId): List<BookmarksSchema>
+  }
+
+  class BookmarksSchema {
+    + ObjectId id
+    + ObjectId bookId
+    + ObjectId userId
+    + int indexPage
+    + String color
+    + String text
+  }
+
+  entity BookmarkDTO {
+    + String color
+    + String text
+  }
+
+  BookmarksModule --> BookmarksController
+  BookmarksController --> BookmarksService
+  BookmarksService --> BookmarksSchema
+
+  class ReviewsModule {
+    + imports: ReviewsSchema, BooksModule,
+    + providers: ReviewsService
+    + controllers: ReviewsController
+  }
+
+  class ReviewsController {
+    + getReviews(bookId: ObjectId): List<ReviewsSchema>
+    + addReview(bookId: ObjectId, reviewData: ReviewDTO): void
+    + deleteReview(reviewId: ObjectId): void
+    + editReview(reviewId: ObjectId, reviewData: ReviewDTO): void
+  }
+
+  class ReviewsService {
+    + fetchReviews(bookId: ObjectId): List<ReviewsSchema>
+    + createReview(bookId: ObjectId, reviewData: ReviewDTO): void
+    + removeReview(reviewId: ObjectId): void
+    + editReview(reviewId: ObjectId, reviewData: ReviewDTO): void
+  }
+
+  class ReviewsSchema {
+    + ObjectId id
+    + ObjectId bookId
+    + ObjectId userId
+    + int rating
+    + String text
+  }
+
+  entity ReviewDTO {
+    + int rating
+    + String text
+  }
+
+  ReviewsModule --> ReviewsController
+  ReviewsController --> ReviewsService
+  ReviewsService --> ReviewsSchema
+
+  class PaymentModule {
+    + imports: PaymentSchema, UsersModule
+    + providers: PaymentService
+    + controllers: PaymentController
+  }
+
+  class PaymentController {
+    + processPayment(paymentData: PaymentDTO): void
+    + getPaymentDetails(paymentId: ObjectId)): PaymentSchema
+  }
+
+  interface IPaymentProvider {
+    + processPayment(paymentData: PaymentDTO): void
+    + getPaymentDetails(paymentId: String): PaymentSchema
+  }
+
+  class PaymentAdapterA implements IPaymentProvider {
+    - apiA: PaymentApiA
+    + processPayment(paymentData: PaymentDTO): void
+    + getPaymentDetails(paymentId: String): PaymentSchema
+  }
+
+  class PaymentAdapterB implements IPaymentProvider {
+    - apiB: PaymentApiB
+    + processPayment(paymentData: PaymentDTO): void
+    + getPaymentDetails(paymentId: String): PaymentSchema
+  }
+
+  class PaymentApiA {
+    + doPaymentA(data: any): void
+    + getPaymentA(id: String): any
+  }
+
+  class PaymentApiB {
+    + executePaymentB(data: any): void
+    + fetchPaymentB(id: String): any
+  }
+
+  class PaymentService {
+    - paymentProvider: IPaymentProvider
+    + setPaymentProvider(provider: IPaymentProvider): void
+    + processPayment(paymentData: PaymentDTO): void
+    + fetchPaymentDetails(paymentId: String): PaymentSchema
+  }
+
+  PaymentService --> IPaymentProvider
+  PaymentAdapterA --> PaymentApiA
+  PaymentAdapterB --> PaymentApiB
+
+
+  class PaymentSchema {
+    + ObjectId id
+    + ObjectId userId
+    + float amount
+    + String cardNumber
+    + Date date
+  }
+
+  entity PaymentDTO {
+    + ObjectId userId
+    + float amount
+    + String cardNumber
+  }
+
+  PaymentModule --> PaymentController
+  PaymentController --> PaymentService
+  PaymentService --> PaymentSchema
+
+  class UsersModule {
+    + imports: UsersSchema, BooksModule
+    + providers: UsersService
+    + controllers: UsersController
+    + exports: UsersService
+  }
+
+  class UsersController {
+    + getUser(id: ObjectId): UsersSchema
+    + getUsers(ids: List<ObjectId>): List<UsersSchema>
+    + changeInfo(userData: UserDTO): UserSchema
+    + changeRole(id: ObjectId, role: Role): UsersSchema
+    + deleteUser(id: ObjectId): void
+    + blockUser(id: ObjectId): void
+    + startSubscription(String: cardNumber): void
+    + stopSubscription(): void
+    + becomeEditor(data: EditorForm): void
+    + allowEditor(userId: ObjectId): void
+    + rejectEditor(userId: ObjectId): void
+    + getList(type: ListType): List<ObjectId>
+  }
+
+  class UsersService {
+    + createUser(userData: UserDTO): UsersSchema
+    + getUserById(id: ObjectId): UsersSchema
+    + getUserByEmail(id: ObjectId): UsersSchema
+    + getUsers(ids: List<ObjectId>): List<UsersSchema>
+    + deleteUser(id: ObjectId): void
+    + blockUser(id: ObjectId): void
+    + changeInfo(userData: UserDTO): UserSchema
+    + changeRole(id: ObjectId, role: Role): UsersSchema
+    + addBoughtBook(bookId: ObjectId): void
+    + getBoughtBooks(userId: ObjectId): List<ObjectId>
+    + startSubscription(String: cardNumber): void
+    + stopSubscription(): void
+    + becomeEditor(data: EditorForm): void
+    + allowEditor(userId: ObjectId): void
+    + rejectEditor(userId: ObjectId): void
+    + addBookToList(type: ListType, bookId: ObjectId): void
+    + deleteBookFromList(type: ListType, bookId: ObjectId): void
+    + getList(type: ListType): List<ObjectId>
+  }
+
+  class UsersSchema {
+    + ObjectId id
+    + String name
+    + String email
+    + String password
+    + String passwordHash
+    + String rtHash
+    + String role
+    + float balance
+    + bool subscription
+    + List<ObjectId> boughtBooks
+    + List<ObjectId> liked
+    + List<ObjectId> want
+    + List<ObjectId> reading
+    + List<ObjectId> read
+  }
+
+  enum ListType {
+    + LIKED
+    + WANT
+    + READING
+    + READ
+  }
+
+  entity EditorForm {
+    + String alias
+    + String mainGenre
+    + String whyBecomeEditor
+    + int experience
+  }
+
+  UsersModule --> UsersController
+  UsersController --> UsersService
+  UsersService --> UsersSchema
+
+  class DatabaseModule {
+    - static instance: DatabaseModule
+    - String uri
+    + static getInstance(uri: String): DatabaseModule
+    + connect(): void
+    + close(): void
+  }
+
+  AppModule ..> BooksModule
+  AppModule ..> BookmarksModule
+  AppModule ..> AuthModule
+  AppModule ..> JwtModule
+  AppModule ..> ReviewsModule
+  AppModule ..> PaymentModule
+  AppModule ..> UsersModule
+  AppModule ..> DatabaseModule
+
+}
+package "Database" {
+  class MongoDB {
+    + String uri
+    + connect(): void
+    + close(): void
+  }
+}
+
+DatabaseModule --> MongoDB
+@enduml
+
+
+для связей между модулями
+UsersService ..> BooksService
+PaymentService ..> UsersService
+AuthService ..> JwtService
+AuthService ..> UsersService
+BooksService ..> UsersService
+BookmarksService ..> BooksService
+BookmarksService ..> UsersService
+ReviewsService ..> BooksService

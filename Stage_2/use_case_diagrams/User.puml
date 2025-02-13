@@ -1,0 +1,32 @@
+@startuml
+  actor "Гость" as Guest
+  actor "Пользователь" as User
+  actor "Редактор" as Editor
+
+  usecase "Редактирование личных данных" as UC_Manage_Profile
+  usecase "Удаление аккаунта" as UC_Delete_Account
+  usecase "Покупка подписки" as UC_Buy_Subscription
+  usecase "Расширенные возможности чтения" as UC_Advanced_Reading
+  usecase "Прослушивание аудиокниг" as UC_Audio_Books
+  usecase "Покупка книг" as UC_Buy_Books
+  usecase "Скачивание книг" as UC_Download_Books
+  usecase "Отзывы и оценки" as UC_Reviews
+  usecase "Создание списков книг" as UC_Create_Booklists
+  usecase "Переход на роль редактора" as UC_Become_Editor
+
+
+  User --> UC_Manage_Profile
+  UC_Delete_Account --> UC_Manage_Profile :<<extend>>
+  User --> UC_Audio_Books
+  User --> UC_Advanced_Reading
+  User --> UC_Download_Books
+  UC_Audio_Books --> UC_Buy_Subscription :<<extend>>
+  UC_Advanced_Reading --> UC_Buy_Subscription :<<extend>>
+  UC_Download_Books--> UC_Buy_Subscription :<<extend>>
+  User --> UC_Buy_Books
+  User --> UC_Reviews
+  User --> UC_Create_Booklists
+  User --> UC_Become_Editor
+  Guest <|-- User
+  User <|-- Editor
+@enduml

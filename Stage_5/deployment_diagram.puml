@@ -1,0 +1,82 @@
+@startuml
+node "Desktop"{
+  rectangle "<<Macos>>" {
+    artifact "Browser" as browser_2
+  }
+}
+node "Mobile Phone"{
+  rectangle "<<Android>>" {
+    artifact "Browser" as browser_1
+  }
+}
+
+  node "Server_Frontend"{
+  rectangle "<<Linux>>" {
+    rectangle "<<Node>>" {
+      artifact "UIComponent" as ui
+      artifact "StoreComponent" as store
+      artifact "AxiosComponent" as axios
+    }
+    artifact "UserDocumentation.pdf" as u_doc
+  }
+}
+
+browser_1 -do-> ui
+browser_2 -do-> ui
+browser_2 -do-> u_doc
+
+
+ui -> store
+store -> axios
+axios -> store
+store -> ui
+
+node "Server_Backend"{
+  rectangle "<<Linux >>" {
+    rectangle "<<Node >>"{
+
+      artifact "ControllerComponent" as controller
+      artifact "JwtComponent" as jwt
+      artifact "AuthComponent" as auth
+      artifact "BooksComponent" as book
+      artifact "BookmarksComponent" as bookmark
+      artifact "ReviewsComponent" as review
+      artifact "PaymentComponent" as payment
+      artifact "UsersComponent" as user
+      artifact "DatabaseComponent" as db_component
+    }
+    artifact "server_config.json"
+  }
+}
+
+
+
+axios -do-> controller
+controller -do-> axios
+
+
+storage "Storage" {
+  rectangle "<<MongoDB>>"{
+    database "Database" as db
+  }
+}
+
+db_component -do-> db
+@enduml
+
+controller - auth
+controller - user
+controller - book
+controller - bookmark
+controller - review
+controller - payment
+
+jwt <- auth
+user <- auth
+book -> user
+user -> book
+bookmark <- book
+review <- book
+user -> payment
+
+user -> db_component

@@ -1,0 +1,22 @@
+@startuml
+  actor "Пользователь" as User
+  actor "Редактор" as Editor
+  actor "Администратор" as Admin
+
+  usecase "Предложение книг" as UC_Suggest_Books
+  usecase "Добавление описаний и обложек" as UC_Add_Descriptions
+  usecase "Удаление опубликованных книг" as UC_Delete_Books
+  usecase "Добавление аудиоверсий" as UC_Add_Audio
+  usecase "Добавление платных книг" as UC_Add_Paid_Books
+  usecase "Получение дохода" as UC_Income
+
+  Editor --> UC_Suggest_Books
+  UC_Suggest_Books  --> UC_Add_Descriptions:<<include>>
+  UC_Add_Audio --> UC_Suggest_Books :<<extend>>
+  UC_Add_Paid_Books--> UC_Suggest_Books :<<extend>>
+  Editor --> UC_Delete_Books
+  Editor --> UC_Income
+
+  User <|-- Editor
+  Editor <|-- Admin
+@enduml

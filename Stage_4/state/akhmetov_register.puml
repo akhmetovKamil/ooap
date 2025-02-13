@@ -1,0 +1,43 @@
+@startuml
+scale 700 width
+
+[*] --left> Idle : render(AuthPage)
+
+state Idle {
+  [*] -left-> RegisterForm : renderRegisterForm()
+  RegisterForm -left-> [*] : back()
+}
+
+RegisterForm -down-> Validating : typing..
+
+state Validating {
+  [*] -right-> PasswordValidation : validate(password)
+  PasswordValidation -down-> Error : setError("Invalid password")
+  PasswordValidation -right-> Submitting : handleRegister(userData)
+
+  state Error {
+    [*] -down-> ShowMessage : displayErrorMessage("PasswordInvalid)
+    ShowMessage -down-> RegisterForm : retry()
+  }
+}
+
+
+Submitting --> Registering : dispatch(register(userData))
+Registering --> Error : setError("User already exists")
+Registering --> Success : success register
+
+state Success {
+  [*] --> SavingAccessToken : setItem("accessToken", accessToken)
+  SavingAccessToken --> SavingRefreshToken : setItem("refreshToken", refreshToken)
+
+
+}
+
+state Error {
+  [*] -right-> ShowErrorMessage : displayErrorMessage("UserExists")
+  ShowErrorMessage -down-> [*] : redirect("LoginPage")
+}
+
+Success --> [*] : redirect("MainPage")
+
+@enduml
